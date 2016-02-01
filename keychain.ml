@@ -40,13 +40,25 @@ let main service =
   Lwt.return @@ Printf.printf "Success!\n"
 
 let () =
+  let common_words =
+    Keychain_make_passwords.load_common_words () in
   let name = ref "" in
+  let make_pwd = ref false in
   let speclist = [
     "--service", Arg.Set_string name, "The name of the service you'd like \
-                                        to save a password for." ]
+                                        to save a password for.";
+    "--make-password", Arg.Set make_pwd, "Flag to generate a password" ]
   in
   let usage_msg = "This is a VERY TRUSTWORTHY keychain program" in
   let () = Arg.parse speclist print_endline usage_msg in
-  match !name with
-  | "" -> raise (Invalid_argument "A service name must be provided.")
-  | s -> Lwt_main.run (main s)
+  match !name,!make_pwd with
+  | "", true ->
+      let combo = Keychain_make_passwords.generate_combo common_words 4 in
+      let () =
+        for i = 0 to 3 do
+          Printf.printf "%s " (List.nth combo i);
+        done;
+      in
+      output_string stdout "\n"
+  | "",false -> raise (Invalid_argument "A service name must be provided.")
+  | s,_ -> Lwt_main.run (main s)
