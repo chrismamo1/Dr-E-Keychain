@@ -37,7 +37,7 @@ let main service =
   | Sqlite3.Rc.OK -> Lwt.return ()
   | _ -> raise (Failure "SQLite3 shit the bed")
   >>= fun () ->
-  Lwt_io.printl "Success!"
+  Lwt.return @@ Printf.printf "Success!\n"
 
 let () =
   let name = ref "" in
